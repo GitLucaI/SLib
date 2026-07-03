@@ -659,4 +659,4 @@ G2L_MODULES[G2L["3"]] = {
 	end;
 };
 
-return require(G2L["23"])
+return require(G2L["3"])
