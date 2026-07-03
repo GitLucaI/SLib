@@ -23,6 +23,7 @@ G2L["1"]["ResetOnSpawn"] = false;
 G2L["2"] = Instance.new("Frame", G2L["1"]);
 G2L["2"]["BorderSizePixel"] = 0;
 G2L["2"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
+G2L["2"]["BackgroundTransparency"] = 1;
 G2L["2"]["AnchorPoint"] = Vector2.new(0.5, 0.5);
 G2L["2"]["Size"] = UDim2.new(0.32425, 0, 0.62422, 0);
 G2L["2"]["Position"] = UDim2.new(0.5, 0, 0.5, 0);
