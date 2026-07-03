@@ -52,10 +52,11 @@ G2L["5"]["Name"] = [[Content]];
 
 -- StarterGui.MainUI.Gui.Content.UICorner
 G2L["6"] = Instance.new("UICorner", G2L["5"]);
-G2L["6"]["TopLeftRadius"] = UDim.new(0, 0);
-G2L["6"]["TopRightRadius"] = UDim.new(0, 0);
 G2L["6"]["BottomLeftRadius"] = UDim.new(0, 15);
 G2L["6"]["BottomRightRadius"] = UDim.new(0, 15);
+G2L["6"]["TopLeftRadius"] = UDim.new(0, 0);
+G2L["6"]["TopRightRadius"] = UDim.new(0, 0);
+
 
 -- StarterGui.MainUI.Gui.Content.Scroller
 G2L["7"] = Instance.new("ScrollingFrame", G2L["5"]);
@@ -296,10 +297,11 @@ G2L["1c"]["BackgroundTransparency"] = 0.35;
 
 -- StarterGui.MainUI.Gui.Topbar.UICorner
 G2L["1d"] = Instance.new("UICorner", G2L["1c"]);
-G2L["1d"]["TopLeftRadius"] = UDim.new(0, 15);
-G2L["1d"]["TopRightRadius"] = UDim.new(0, 15);
-G2L["1d"]["BottomLeftRadius"] = UDim.new(0, 0);
-G2L["1d"]["BottomRightRadius"] = UDim.new(0, 0);
+G2L["6"]["BottomLeftRadius"] = UDim.new(0, 0);
+G2L["6"]["BottomRightRadius"] = UDim.new(0, 0);
+G2L["6"]["TopLeftRadius"] = UDim.new(0, 15);
+G2L["6"]["TopRightRadius"] = UDim.new(0, 15);
+
 -- StarterGui.MainUI.Gui.Topbar.TextLabel
 G2L["1e"] = Instance.new("TextLabel", G2L["1c"]);
 G2L["1e"]["TextWrapped"] = true;
@@ -500,163 +502,163 @@ G2L["33"]["Name"] = [[Content]];
 local G2L_REQUIRE = require;
 local G2L_MODULES = {};
 local function require(Module:ModuleScript)
-	local ModuleState = G2L_MODULES[Module];
-	if ModuleState then
-		if not ModuleState.Required then
-			ModuleState.Required = true;
-			ModuleState.Value = ModuleState.Closure();
-		end
-		return ModuleState.Value;
-	end;
-	return G2L_REQUIRE(Module);
+    local ModuleState = G2L_MODULES[Module];
+    if ModuleState then
+        if not ModuleState.Required then
+            ModuleState.Required = true;
+            ModuleState.Value = ModuleState.Closure();
+        end
+        return ModuleState.Value;
+    end;
+    return G2L_REQUIRE(Module);
 end
 
 G2L_MODULES[G2L["3"]] = {
-	Closure = function()
-		local script = G2L["3"];local Library = {}
+Closure = function()
+    local script = G2L["3"];local Library = {}
 
-		local scroller = script.Parent:WaitForChild("Content"):WaitForChild("Scroller")
-		local UIS = game:GetService("UserInputService")
-		local Templates = {
-			Button = scroller:WaitForChild("Button"),
-			Label = scroller:WaitForChild("Label"),
-			Toggle = scroller:WaitForChild("Toggle"),
-			Textbox = scroller:WaitForChild("Textbox")
-		}
+local scroller = script.Parent:WaitForChild("Content"):WaitForChild("Scroller")
+local UIS = game:GetService("UserInputService")
+local Templates = {
+	Button = scroller:WaitForChild("Button"),
+	Label = scroller:WaitForChild("Label"),
+	Toggle = scroller:WaitForChild("Toggle"),
+	Textbox = scroller:WaitForChild("Textbox")
+}
 
-		Templates.Button.Visible = false
-		Templates.Label.Visible = false
-		Templates.Toggle.Visible = false
-		Templates.Textbox.Visible = false
+Templates.Button.Visible = false
+Templates.Label.Visible = false
+Templates.Toggle.Visible = false
+Templates.Textbox.Visible = false
 
-		local currentOrder = 0
+local currentOrder = 0
 
-		UIS.InputBegan:Connect(function(input, gpe)
-			if gpe then return end
-			if input.KeyCode == Enum.KeyCode.Delete then
-				script.Parent.Visible = not script.Parent.Visible
-			end
-		end)
+UIS.InputBegan:Connect(function(input, gpe)
+	if gpe then return end
+	if input.KeyCode == Enum.KeyCode.Delete then
+		script.Parent.Visible = not script.Parent.Visible
+	end
+end)
 
-		if UIS.TouchEnabled then
-			script.Parent.Parent.ToggleUI.Visible = false
+if UIS.TouchEnabled then
+	script.Parent.Parent.ToggleUI.Visible = false
+end
+
+script.Parent:WaitForChild("Topbar").Minimize.MouseButton1Click:Connect(function()
+	script.Parent.Visible = false
+end)
+
+script.Parent.Parent.ToggleUI.MouseButton1Click:Connect(function()
+	script.Parent.Visible = not script.Parent.Visible
+end)
+
+function Library:Notify(message)
+	--waits 15s till autodestroy
+	local notification = script.Parent.Parent.Notifications.Template:Clone()
+	notification.Main.Content.Text = message
+	notification.Visible = true
+	notification.Parent = script.Parent.Parent.Notifications
+	notification.Main:TweenPosition(UDim2.new(0, 0, 0, 0), Enum.EasingDirection.Out, Enum.EasingStyle.Bounce, 1)
+	task.wait(1)
+	notification.Main.Close.MouseButton1Click:Connect(function()
+		notification.Main:TweenPosition(UDim2.new(1.1, 0, 0, 0), Enum.EasingDirection.In, Enum.EasingStyle.Bounce, 1)
+		task.wait(1)
+		notification:Destroy()
+	end)
+	for i = 1, 15 do
+		notification.Main.Close.Text = "Okay (" .. (15 - i) .. ")"
+		task.wait(1)
+	end
+	task.wait()
+	notification.Main:TweenPosition(UDim2.new(1.1, 0, 0, 0), Enum.EasingDirection.In, Enum.EasingStyle.Bounce, 1)
+	task.wait(1)
+	notification:Destroy()
+end
+
+function Library:AddLabel(text)
+	local label = Templates.Label:Clone()
+
+	currentOrder = currentOrder + 1
+	label.LayoutOrder = currentOrder
+
+	label.TextLabel.Text = text
+	label.Visible = true
+	label.Parent = scroller
+
+	return label
+end
+
+function Library:AddButton(text, callback)
+	local button = Templates.Button:Clone()
+
+	currentOrder = currentOrder + 1
+	button.LayoutOrder = currentOrder
+
+	button.Action.Text = text
+	button.Visible = true
+	button.Parent = scroller
+
+	button.Action.MouseButton1Click:Connect(function()
+		if callback then
+			callback()
 		end
+	end)
 
-		script.Parent:WaitForChild("Topbar").Minimize.MouseButton1Click:Connect(function()
-			script.Parent.Visible = false
-		end)
+	return button
+end
 
-		script.Parent.Parent.ToggleUI.MouseButton1Click:Connect(function()
-			script.Parent.Visible = not script.Parent.Visible
-		end)
+function Library:AddToggle(text, defaultState, callback)
+	local toggleElement = Templates.Toggle:Clone()
+	local currentState = defaultState or false
+	local cd = false
+	currentOrder = currentOrder + 1
+	toggleElement.LayoutOrder = currentOrder
 
-		function Library:Notify(message)
-			--waits 15s till autodestroy
-			local notification = script.Parent.Parent.Notifications.Template:Clone()
-			notification.Main.Content.Text = message
-			notification.Visible = true
-			notification.Parent = script.Parent.Parent.Notifications
-			notification.Main:TweenPosition(UDim2.new(0, 0, 0, 0), Enum.EasingDirection.Out, Enum.EasingStyle.Bounce, 1)
-			task.wait(1)
-			notification.Main.Close.MouseButton1Click:Connect(function()
-				notification.Main:TweenPosition(UDim2.new(1.1, 0, 0, 0), Enum.EasingDirection.In, Enum.EasingStyle.Bounce, 1)
-				task.wait(1)
-				notification:Destroy()
-			end)
-			for i = 1, 15 do
-				notification.Main.Close.Text = "Okay (" .. (15 - i) .. ")"
-				task.wait(1)
-			end
-			task.wait()
-			notification.Main:TweenPosition(UDim2.new(1.1, 0, 0, 0), Enum.EasingDirection.In, Enum.EasingStyle.Bounce, 1)
-			task.wait(1)
-			notification:Destroy()
+	toggleElement.TextLabel.Text = text
+	toggleElement.Visible = true
+	toggleElement.Parent = scroller
+
+	toggleElement.Action.Toggle.MouseButton1Click:Connect(function()
+		if cd then return end
+		cd = true
+		currentState = not currentState
+		if currentState then
+			toggleElement.Action.Toggle:TweenPosition(UDim2.new(0.5, 0, 0, 0), Enum.EasingDirection.In, Enum.EasingStyle.Linear, 0.125)
+		else
+			toggleElement.Action.Toggle:TweenPosition(UDim2.new(0, 0, 0, 0), Enum.EasingDirection.Out, Enum.EasingStyle.Linear, 0.125)
 		end
-
-		function Library:AddLabel(text)
-			local label = Templates.Label:Clone()
-
-			currentOrder = currentOrder + 1
-			label.LayoutOrder = currentOrder
-
-			label.TextLabel.Text = text
-			label.Visible = true
-			label.Parent = scroller
-
-			return label
+		if callback then
+			callback(currentState)
 		end
+		wait(0.25)
+		cd = false
+	end)
 
-		function Library:AddButton(text, callback)
-			local button = Templates.Button:Clone()
+	return toggleElement
+end
 
-			currentOrder = currentOrder + 1
-			button.LayoutOrder = currentOrder
+function Library:AddTextbox(text, defaultInput, callback)
+	local textboxElement = Templates.Textbox:Clone()
 
-			button.Action.Text = text
-			button.Visible = true
-			button.Parent = scroller
+	currentOrder = currentOrder + 1
+	textboxElement.LayoutOrder = currentOrder
 
-			button.Action.MouseButton1Click:Connect(function()
-				if callback then
-					callback()
-				end
-			end)
+	textboxElement.TextLabel.Text = text
+	textboxElement.Action.Text = defaultInput or ""
+	textboxElement.Visible = true
+	textboxElement.Parent = scroller
 
-			return button
+	textboxElement.Action.FocusLost:Connect(function()
+		if callback then
+			callback(textboxElement.Action.Text)
 		end
+	end)
 
-		function Library:AddToggle(text, defaultState, callback)
-			local toggleElement = Templates.Toggle:Clone()
-			local currentState = defaultState or false
-			local cd = false
-			currentOrder = currentOrder + 1
-			toggleElement.LayoutOrder = currentOrder
+	return textboxElement
+end
 
-			toggleElement.TextLabel.Text = text
-			toggleElement.Visible = true
-			toggleElement.Parent = scroller
-
-			toggleElement.Action.Toggle.MouseButton1Click:Connect(function()
-				if cd then return end
-				cd = true
-				currentState = not currentState
-				if currentState then
-					toggleElement.Action.Toggle:TweenPosition(UDim2.new(0.5, 0, 0, 0), Enum.EasingDirection.In, Enum.EasingStyle.Linear, 0.125)
-				else
-					toggleElement.Action.Toggle:TweenPosition(UDim2.new(0, 0, 0, 0), Enum.EasingDirection.Out, Enum.EasingStyle.Linear, 0.125)
-				end
-				if callback then
-					callback(currentState)
-				end
-				wait(0.25)
-				cd = false
-			end)
-
-			return toggleElement
-		end
-
-		function Library:AddTextbox(text, defaultInput, callback)
-			local textboxElement = Templates.Textbox:Clone()
-
-			currentOrder = currentOrder + 1
-			textboxElement.LayoutOrder = currentOrder
-
-			textboxElement.TextLabel.Text = text
-			textboxElement.Action.Text = defaultInput or ""
-			textboxElement.Visible = true
-			textboxElement.Parent = scroller
-
-			textboxElement.Action.FocusLost:Connect(function()
-				if callback then
-					callback(textboxElement.Action.Text)
-				end
-			end)
-
-			return textboxElement
-		end
-
-		return Library
-	end;
+return Library
+end;
 };
 
-return require(G2L["3"])
+return require(G2L["3"]);
