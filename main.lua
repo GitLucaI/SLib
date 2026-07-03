@@ -64,6 +64,7 @@ G2L["6"]["Size"] = UDim2.new(1, 0, 1, 0);
 G2L["6"]["ScrollBarImageColor3"] = Color3.fromRGB(0, 0, 0);
 G2L["6"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
 G2L["6"]["ScrollBarThickness"] = 0;
+G2L["6"]["AutomaticCanvasSize"] = Enum.AutomaticSize.Y;
 G2L["6"]["BackgroundTransparency"] = 1;
 
 
