@@ -920,7 +920,7 @@ UIS.InputBegan:Connect(function(input, gpe)
 	end
 end)
 
-if UIS.TouchEnabled then
+if not UIS.TouchEnabled then
 	script.Parent.Parent.ToggleUI.Visible = false
 end
 
