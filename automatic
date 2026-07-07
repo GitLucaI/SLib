@@ -282,7 +282,10 @@ G2L["1a"]["CellPadding"] = UDim2.new(0, 0, 0, 0);
 
 -- StarterGui.MainUI.Gui.Content.UIGradient
 G2L["1b"] = Instance.new("UIGradient", G2L["5"]);
-G2L["1b"]["Color"] = ColorSequence.new{ColorSequenceKeypoint.new(0.000, Color3.fromRGB(94, 0, 255)),ColorSequenceKeypoint.new(1.000, Color3.fromRGB(203, 12, 255))};
+G2L["1b"]["Color"] = ColorSequence.new{
+    ColorSequenceKeypoint.new(0.000, Color3.fromRGB(74, 86, 111)),
+    ColorSequenceKeypoint.new(1.000, Color3.fromRGB(73, 58, 86))
+};
 
 
 -- StarterGui.MainUI.Gui.Topbar
@@ -343,7 +346,10 @@ G2L["20"]["CornerRadius"] = UDim.new(0, 0);
 
 -- StarterGui.MainUI.Gui.Topbar.UIGradient
 G2L["21"] = Instance.new("UIGradient", G2L["1c"]);
-G2L["21"]["Color"] = ColorSequence.new{ColorSequenceKeypoint.new(0.000, Color3.fromRGB(94, 0, 255)),ColorSequenceKeypoint.new(1.000, Color3.fromRGB(203, 12, 255))};
+G2L["21"]["Color"] = ColorSequence.new{
+    ColorSequenceKeypoint.new(0.000, Color3.fromRGB(74, 86, 111)),
+    ColorSequenceKeypoint.new(1.000, Color3.fromRGB(73, 58, 86))
+};
 
 
 -- StarterGui.MainUI.Gui.UIShadow
@@ -387,7 +393,10 @@ G2L["27"]["CornerRadius"] = UDim.new(1, 0);
 
 -- StarterGui.MainUI.ToggleUI.UIGradient
 G2L["28"] = Instance.new("UIGradient", G2L["25"]);
-G2L["28"]["Color"] = ColorSequence.new{ColorSequenceKeypoint.new(0.000, Color3.fromRGB(94, 0, 255)),ColorSequenceKeypoint.new(1.000, Color3.fromRGB(203, 12, 255))};
+G2L["28"]["Color"] = ColorSequence.new{
+    ColorSequenceKeypoint.new(0.000, Color3.fromRGB(74, 86, 111)),
+    ColorSequenceKeypoint.new(1.000, Color3.fromRGB(73, 58, 86))
+};
 
 
 -- StarterGui.MainUI.ToggleUI.TextLabel
@@ -459,7 +468,10 @@ G2L["2f"] = Instance.new("UICorner", G2L["2e"]);
 
 -- StarterGui.MainUI.Notifications.Template.Main.UIGradient
 G2L["30"] = Instance.new("UIGradient", G2L["2e"]);
-G2L["30"]["Color"] = ColorSequence.new{ColorSequenceKeypoint.new(0.000, Color3.fromRGB(94, 0, 255)),ColorSequenceKeypoint.new(1.000, Color3.fromRGB(203, 12, 255))};
+G2L["30"]["Color"] = ColorSequence.new{
+    ColorSequenceKeypoint.new(0.000, Color3.fromRGB(74, 86, 111)),
+    ColorSequenceKeypoint.new(1.000, Color3.fromRGB(73, 58, 86))
+};
 
 
 -- StarterGui.MainUI.Notifications.Template.Main.Close
