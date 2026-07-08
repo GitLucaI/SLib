@@ -28,7 +28,7 @@ Create bind event:
 ### Input value elements
 Create textbox:
 ```Library:AddTextbox(tab, text, defaultinput, callback)```
-Crate color picker:
+Create color picker:
 ```Library:AddColorPicker(tab, text, defaultcolor, callback)```
 
 ### Multiple input value elements:
