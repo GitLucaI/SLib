@@ -631,6 +631,7 @@ G2L["3d"]["CanvasSize"] = UDim2.new(0, 0, 0, 0);
 G2L["3d"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
 G2L["3d"]["Name"] = [[Tabs]];
 G2L["3d"]["AutomaticCanvasSize"] = Enum.AutomaticSize.X;
+G2L["3d"]["ScrollingEnabled"] = false;
 G2L["3d"]["Size"] = UDim2.new(1, 0, 0.9, 0);
 G2L["3d"]["ScrollBarImageColor3"] = Color3.fromRGB(0, 0, 0);
 G2L["3d"]["Position"] = UDim2.new(0, 0, 0.1, 0);
