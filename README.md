@@ -1,51 +1,39 @@
-## Main
-### Initialization
-```lua
+API Documentation
+Initialization
 local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/GitLucaI/SLib/refs/heads/main/automatic"))()
-```
-### Library Settings
-Save session modification:
-```Library:EnableDataSaving("ScriptName")```
-Modify Library theme:
-```Library:SetBackgroundTheme(colorsequence)```
-If you don't know how to use colorsequence gradients, do not interact with this function.
 
-### Main
-Create tab:
-```Library:AddTab(name, layoutorder)```
-Create label:
-```Library:AddLabel(tab, text)```
-Create notification:
-```Library:Notify(message)```
-
-### Interactables
-Create button:
-```Library:AddButton(tab, text, callback, defaultkey, keybindcallback)```
-Create toggle:
-```Library:AddToggle(tab, text, defaultstate, callback, defaultkey, keybindcallback)```
-Create bind event:
-```Library:AddBind(tab, text, defaultkey, callback)```
-
-### Input value elements
-Create textbox:
-```Library:AddTextbox(tab, text, defaultinput, callback)```
-Create color picker:
-```Library:AddColorPicker(tab, text, defaultcolor, callback)```
-
-### Multiple input value elements:
-Create gradient picker:
-```Library:AddGradientPicker(tab, text, defaultstartcolor, defaultendcolor, callback)```
-
-## Help
-```name: the name you want to use for the tab you are creating. Do not use duplicate names!```
-```layoutorder: the order in which the defined tab will be found in the tabs list.```
-```message: the message you want to be displayed by the notification```
-```tab: the tab you want to insert a specific element into```
-```text: the display text you want to be shown inside an element's title```
-```callback: executes a function when an element is interacted with```
-```defaultkey: the default key that when pressed will fire an element's event```
-```keybindcallback: deprecated```
-```defaultstate: the default state a toggle will be inserted with```
-```defaultinput: the default input value a textbox will be inserted with```
-```defaultcolor, defaultstartcolor, defaultendcolor: the default colors a color picker/gradient picker element will be inserted with```
-
+Library Settings
+| Function | Description |
+|---|---|
+| Library:EnableDataSaving("ScriptName") | Saves session modification. |
+| Library:SetBackgroundTheme(colorsequence) | Modifies the Library theme. |
+Main Elements
+| Function | Description |
+|---|---|
+| Library:AddTab(name, layoutorder) | Creates a new tab. |
+| Library:AddLabel(tab, text) | Creates a label within a tab. |
+| Library:Notify(message) | Displays a notification message. |
+Interactables
+| Function | Description |
+|---|---|
+| Library:AddButton(tab, text, callback, defaultkey, keybindcallback) | Creates a clickable button. |
+| Library:AddToggle(tab, text, defaultstate, callback, defaultkey, keybindcallback) | Creates a toggle switch. |
+| Library:AddBind(tab, text, defaultkey, callback) | Creates a keybind event. |
+Input Elements
+| Function | Description |
+|---|---|
+| Library:AddTextbox(tab, text, defaultinput, callback) | Creates a text input field. |
+| Library:AddColorPicker(tab, text, defaultcolor, callback) | Creates a color selection tool. |
+| Library:AddGradientPicker(tab, text, defaultstartcolor, defaultendcolor, callback) | Creates a gradient selection tool. |
+Parameter Definitions
+ * name: The unique name for the tab. Do not use duplicate names.
+ * layoutorder: The numerical order of the tab in the list.
+ * message: The text content for the notification.
+ * tab: The reference to the parent tab for the element.
+ * text: The display title for the element.
+ * callback: The function executed upon interaction.
+ * defaultkey: The initial keybind assigned to the element.
+ * keybindcallback: Deprecated.
+ * defaultstate: The initial true/false state for toggles.
+ * defaultinput: The starting text for the textbox.
+ * defaultcolor/start/end: The initial Color3 values for pickers.
