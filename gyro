@@ -1,3 +1,5 @@
+local InputService = game:GetService("UserInputService")
+
 if InputService.GyroscopeEnabled then
 		
 				if not InputService.GyroscopeEnabled or not InputService.AccelerometerEnabled then
