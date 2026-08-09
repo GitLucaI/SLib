@@ -1,62 +1,356 @@
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
+local VirtualInputManager = game:GetService("VirtualInputManager")
+local StarterGui = game:GetService("StarterGui")
 
 local player = Players.LocalPlayer
 
 if UserInputService.GyroscopeEnabled and UserInputService.AccelerometerEnabled then
-	local mc = workspace.CurrentCamera
+	pcall(function()
+		StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Backpack, false)
+	end)
+
 	local half_pi = math.pi / 2
 	local gx, gy, gz = 0, 0, 0
+	local smoothRoll = 0
+	local lastJumpTime = 0
+	local lastResetClick = 0
+	local customControlsVisible = true
+	local hudRot = CFrame.new()
+	local isFirstPerson = true
 
-	UserInputService.DeviceGravityChanged:Connect(function(accel)
-		local gravity = accel.Position
+	UserInputService.MouseIconEnabled = false
+
+	UserInputService.DeviceGravityChanged:Connect(function(input)
+		local gravity = input.Position
 		gx, gy, gz = gravity.X, gravity.Y, gravity.Z
 	end)
 
-	local CharTransparency = 0
-	local function SetCharacterTransparency(charModel, toggle)
-		CharTransparency = toggle
-		local charPrimary = charModel.PrimaryPart
-		for _, part in pairs(charModel:GetDescendants()) do
-			if (part:IsA("BasePart") or part:IsA("MeshPart")) and part ~= charPrimary then
-				if not part.Parent:IsA("Tool") then
-					part.Transparency = toggle
+	local playerGui = player:WaitForChild("PlayerGui")
+
+	local mainGui = Instance.new("ScreenGui")
+	mainGui.Name = "GyroControls"
+	mainGui.ResetOnSpawn = false
+	mainGui.IgnoreGuiInset = true
+	mainGui.DisplayOrder = 9999
+	mainGui.Parent = playerGui
+
+	local hudPanel = Instance.new("Part")
+	hudPanel.Name = "VRWorldHUD"
+	hudPanel.Size = Vector3.new(12, 6.75, 0.1)
+	hudPanel.Transparency = 1
+	hudPanel.CanCollide = false
+	hudPanel.Anchored = true
+	hudPanel.Parent = workspace
+
+	local function hookGui(gui)
+		if gui:IsA("ScreenGui") and gui.Name ~= "GyroControls" and not gui:GetAttribute("VRHooked") then
+			if gui.Name == "TouchGui" then
+				gui.Enabled = false
+				return
+			end
+			
+			gui:SetAttribute("VRHooked", true)
+			
+			local sg = Instance.new("SurfaceGui")
+			sg.Name = gui.Name
+			sg.Adornee = hudPanel
+			sg.Face = Enum.NormalId.Front
+			sg.SizingMode = Enum.SurfaceGuiSizingMode.FixedSize
+			sg.CanvasSize = Vector2.new(1920, 1080)
+			sg.AlwaysOnTop = true
+			sg.ResetOnSpawn = gui.ResetOnSpawn
+			sg.ZIndexBehavior = gui.ZIndexBehavior
+			sg.Enabled = gui.Enabled
+			
+			for _, child in ipairs(gui:GetChildren()) do
+				pcall(function() child.Parent = sg end)
+			end
+			
+			gui:GetPropertyChangedSignal("Enabled"):Connect(function()
+				sg.Enabled = gui.Enabled
+			end)
+			
+			gui.ChildAdded:Connect(function(child)
+				task.wait()
+				pcall(function() child.Parent = sg end)
+			end)
+			
+			gui.Name = gui.Name .. "_Original"
+			sg.Parent = playerGui
+		end
+	end
+
+	for _, g in ipairs(playerGui:GetChildren()) do hookGui(g) end
+	playerGui.ChildAdded:Connect(hookGui)
+
+	local crosshairFrame = Instance.new("Frame")
+	crosshairFrame.Size = UDim2.new(0.00666, 0, 0.00666, 0)
+	crosshairFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
+	crosshairFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+	crosshairFrame.SizeConstraint = Enum.SizeConstraint.RelativeYY
+	crosshairFrame.BackgroundColor3 = Color3.new(1, 1, 1)
+	crosshairFrame.Active = false
+	crosshairFrame.Interactable = false
+	crosshairFrame.Parent = mainGui
+
+	local corner = Instance.new("UICorner")
+	corner.CornerRadius = UDim.new(1, 0)
+	corner.Parent = crosshairFrame
+
+	local customControlsContainer = Instance.new("Frame")
+	customControlsContainer.Name = "CustomControlsContainer"
+	customControlsContainer.Size = UDim2.new(1, 0, 1, 0)
+	customControlsContainer.BackgroundTransparency = 1
+	customControlsContainer.Parent = mainGui
+
+	local function styleButton(btn, text, pos, anchor)
+		btn.Size = UDim2.new(0, 100, 0, 100)
+		btn.Position = pos
+		btn.AnchorPoint = anchor
+		btn.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+		btn.BackgroundTransparency = 0.3
+		btn.Text = text
+		btn.TextColor3 = Color3.new(1, 1, 1)
+		btn.Font = Enum.Font.FredokaOne
+		btn.TextSize = 45
+		btn.Active = true
+		btn.Parent = customControlsContainer
+
+		local btnCorner = Instance.new("UICorner")
+		btnCorner.CornerRadius = UDim.new(0.5, 0)
+		btnCorner.Parent = btn
+	end
+
+	local clickBtn = Instance.new("TextButton")
+	styleButton(clickBtn, "O", UDim2.new(0.05, 0, 0.3, 0), Vector2.new(0, 0.5))
+
+	local fpBtn = Instance.new("TextButton")
+	styleButton(fpBtn, "🔒", UDim2.new(0.05, 0, 0.45, 0), Vector2.new(0, 0.5))
+
+	local resetBtn = Instance.new("TextButton")
+	styleButton(resetBtn, "R", UDim2.new(0.05, 0, 0.6, 0), Vector2.new(0, 0.5))
+
+	local jumpBtn = Instance.new("TextButton")
+	styleButton(jumpBtn, "▲", UDim2.new(0.95, 0, 0.6, 0), Vector2.new(1, 0.5))
+
+	local toolFrame = Instance.new("Frame")
+	toolFrame.Size = UDim2.new(0.6, 0, 0, 90)
+	toolFrame.Position = UDim2.new(0.5, 0, 0.95, 0)
+	toolFrame.AnchorPoint = Vector2.new(0.5, 1)
+	toolFrame.BackgroundTransparency = 1
+	toolFrame.Parent = customControlsContainer
+
+	local layout = Instance.new("UIListLayout")
+	layout.FillDirection = Enum.FillDirection.Horizontal
+	layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+	layout.SortOrder = Enum.SortOrder.LayoutOrder
+	layout.Padding = UDim.new(0, 15)
+	layout.Parent = toolFrame
+
+	local function updateTools()
+		for _, child in ipairs(toolFrame:GetChildren()) do
+			if child:IsA("TextButton") then child:Destroy() end
+		end
+		local char = player.Character
+		local backpack = player:FindFirstChild("Backpack")
+		local tools = {}
+
+		if backpack then
+			for _, t in ipairs(backpack:GetChildren()) do
+				if t:IsA("Tool") then table.insert(tools, t) end
+			end
+		end
+		if char then
+			for _, t in ipairs(char:GetChildren()) do
+				if t:IsA("Tool") then table.insert(tools, t) end
+			end
+		end
+
+		for _, t in ipairs(tools) do
+			local btn = Instance.new("TextButton")
+			btn.Size = UDim2.new(0, 90, 0, 90)
+			btn.BackgroundColor3 = (t.Parent == char) and Color3.new(0.2, 0.8, 0.2) or Color3.fromRGB(30, 30, 30)
+			btn.BackgroundTransparency = 0.3
+			btn.Text = t.Name
+			btn.TextColor3 = Color3.new(1, 1, 1)
+			btn.Font = Enum.Font.FredokaOne
+			btn.TextSize = 16
+			btn.TextWrapped = true
+			btn.Parent = toolFrame
+
+			local btnCorner = Instance.new("UICorner")
+			btnCorner.CornerRadius = UDim.new(0.2, 0)
+			btnCorner.Parent = btn
+
+			btn.MouseButton1Click:Connect(function()
+				if char and char:FindFirstChild("Humanoid") then
+					if t.Parent == char then
+						char.Humanoid:UnequipTools()
+					else
+						char.Humanoid:EquipTool(t)
+					end
+					updateTools()
 				end
+			end)
+		end
+	end
+
+	local function bindCharacter(char)
+		char.ChildAdded:Connect(updateTools)
+		char.ChildRemoved:Connect(updateTools)
+		updateTools()
+
+		task.delay(0.1, function()
+			local mc = workspace.CurrentCamera
+			if mc and isFirstPerson then
+				mc.CameraType = Enum.CameraType.Custom
+				player.CameraMode = Enum.CameraMode.LockFirstPerson
+			end
+		end)
+	end
+
+	if player.Character then
+		bindCharacter(player.Character)
+	end
+	player.CharacterAdded:Connect(bindCharacter)
+
+	local backpack = player:WaitForChild("Backpack")
+	backpack.ChildAdded:Connect(updateTools)
+	backpack.ChildRemoved:Connect(updateTools)
+	updateTools()
+
+	clickBtn.MouseButton1Click:Connect(function()
+		local cx = crosshairFrame.AbsolutePosition.X + (crosshairFrame.AbsoluteSize.X / 2)
+		local cy = crosshairFrame.AbsolutePosition.Y + (crosshairFrame.AbsoluteSize.Y / 2)
+		VirtualInputManager:SendMouseButtonEvent(cx, cy, 0, true, game, 0)
+		task.wait(0.05)
+		VirtualInputManager:SendMouseButtonEvent(cx, cy, 0, false, game, 0)
+	end)
+
+	fpBtn.MouseButton1Click:Connect(function()
+		isFirstPerson = not isFirstPerson
+		local mc = workspace.CurrentCamera
+		if isFirstPerson then
+			if mc then mc.CameraType = Enum.CameraType.Custom end
+			player.CameraMode = Enum.CameraMode.LockFirstPerson
+			fpBtn.Text = "🔒"
+			UserInputService.MouseIconEnabled = false
+		else
+			player.CameraMode = Enum.CameraMode.Classic
+			if mc then mc.CameraType = Enum.CameraType.Custom end
+			fpBtn.Text = "🔓"
+			UserInputService.MouseIconEnabled = true
+		end
+	end)
+
+	resetBtn.MouseButton1Click:Connect(function()
+		local now = os.clock()
+		if now - lastResetClick < 1 then
+			local char = player.Character
+			if char then
+				local hum = char:FindFirstChild("Humanoid")
+				if hum then hum.Health = 0 end
+			end
+			lastResetClick = 0
+		else
+			lastResetClick = now
+		end
+	end)
+
+	jumpBtn.MouseButton1Click:Connect(function()
+		local char = player.Character
+		if char then
+			local hum = char:FindFirstChild("Humanoid")
+			if hum then hum.Jump = true end
+		end
+	end)
+
+	UserInputService.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
+			local pos = input.Position
+			local mc = workspace.CurrentCamera
+			if not mc then return end
+			local vp = mc.ViewportSize
+			local triangleSize = 150
+			if pos.X + (vp.Y - pos.Y) < triangleSize then
+				customControlsVisible = not customControlsVisible
+				mainGui.Enabled = customControlsVisible
+				customControlsContainer.Visible = customControlsVisible
+			end
+		end
+	end)
+
+	player.CameraMode = Enum.CameraMode.LockFirstPerson
+	if workspace.CurrentCamera then
+		workspace.CurrentCamera.CameraType = Enum.CameraType.Custom
+	end
+
+	local function tgyro(dt)
+		local mc = workspace.CurrentCamera
+		if not mc then return end
+
+		local cp = mc.CFrame.Position
+		local roll = (gx > 0 and half_pi or -half_pi) - math.atan2(gx, gz)
+		local pitch = math.atan2(gy, (gx * gx + gz * gz) ^ 0.5) * 2
+
+		local successRot, rcf = pcall(function()
+			return select(2, UserInputService:GetDeviceRotation())
+		end)
+
+		if successRot and rcf then
+			local _, _, yaw = rcf:ToEulerAnglesXYZ()
+			smoothRoll = smoothRoll + (roll - smoothRoll) * (dt * 8)
+
+			local newCamCFrame = nil
+
+			if mc.ViewportSize.Y > mc.ViewportSize.X then
+				local sd = (select(7, rcf:GetComponents()))
+				newCamCFrame = CFrame.new(cp)
+					* CFrame.Angles(0, sd * 10, -2 * rcf:ToOrientation())
+					* CFrame.Angles(pitch, 0, 0)
+			else
+				newCamCFrame = CFrame.new(cp)
+					* CFrame.Angles(0, yaw * 2, 0)
+					* CFrame.Angles(pitch * 0.25, 0, roll)
+			end
+
+			if isFirstPerson or mc.CameraType == Enum.CameraType.Scriptable then
+				mc.CFrame = newCamCFrame
+			end
+
+			if hudRot == CFrame.new() then
+				hudRot = mc.CFrame.Rotation
+			end
+
+			hudRot = hudRot:Lerp(mc.CFrame.Rotation, 1 - math.exp(-dt * 6))
+			hudPanel.CFrame = CFrame.new(cp) * hudRot * CFrame.new(0, 0, -5) * CFrame.Angles(0, math.pi, 0)
+		end
+
+		local char = player.Character
+		if not char then return end
+		local humanoid = char:FindFirstChild("Humanoid")
+		if not humanoid or humanoid.Health <= 0 then return end
+
+		if math.abs(math.deg(smoothRoll)) > 6 and isFirstPerson then
+			humanoid:Move(Vector3.new(0, 0, -1), true)
+		else
+			humanoid:Move(Vector3.new(0, 0, 0), true)
+		end
+
+		local successAcc, accObj = pcall(function()
+			return UserInputService:GetDeviceAcceleration()
+		end)
+		if successAcc and accObj then
+			local accY = accObj.Position.Y
+			local now = os.clock()
+			if accY > 4.5 and (now - lastJumpTime > 0.6) then
+				lastJumpTime = now
+				humanoid.Jump = true
 			end
 		end
 	end
 
-	local function tgyro()
-		local roll = (gx > 0 and half_pi or -half_pi) - math.atan2(gx, gz)
-		local pitch = math.atan2(gy, (gx * gx + gz * gz) ^ 0.5) * 2
-		local _, rcf = InputService:GetDeviceRotation()
-		local _, _, yaw = rcf:ToEulerAnglesXYZ()
-
-		local acc = InputService:GetDeviceAcceleration().Position
-		local sens = 0.07 
-		local camshift_factor = acc.X
-
-		if math.abs(camshift_factor) < sens then
-			camshift_factor = 0
-		end
-
-		local cp = workspace.CurrentCamera.CFrame.Position
-		if mc.ViewportSize.Y > mc.ViewportSize.X then
-			local sd = (select(7, rcf:GetComponents()))
-			mc.CFrame = CFrame.new(cp)
-				* CFrame.Angles(0, sd * 10, -2 * rcf:ToOrientation())
-				* CFrame.Angles(pitch, 0, 0)
-		else
-			mc.CFrame = CFrame.new(cp)
-				* CFrame.Angles(0, yaw * 2, 0) 
-				* CFrame.Angles(pitch * .25, 0, roll) 
-		end
-	end
-
-	local char = player.Character or player.CharacterAdded:Wait()
-	SetCharacterTransparency(char, 1)
-
-	mc.CameraType = Enum.CameraType.Custom
 	RunService:BindToRenderStep("Camera", Enum.RenderPriority.Camera.Value + 1, tgyro)
 end
