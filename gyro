@@ -1,0 +1,61 @@
+if InputService.GyroscopeEnabled then
+		
+				if not InputService.GyroscopeEnabled or not InputService.AccelerometerEnabled then
+					return
+				end
+		
+				local mc = workspace.CurrentCamera
+				local half_pi = math.pi / 2
+				local gx, gy, gz = 0, 0, 0
+		
+				InputService.DeviceGravityChanged:connect(function(accel)
+					local gravity = accel.Position
+					gx, gy, gz = gravity.X, gravity.Y, gravity.Z
+				end)
+		
+				local CharTransparency = 0
+				local function SetCharacterTransparency(charModel, toggle)
+					CharTransparency = toggle
+					local charPrimary = charModel.PrimaryPart
+					for _, part in pairs(charModel:GetDescendants()) do
+						if (part:IsA("BasePart") or part:IsA("MeshPart")) and part ~= charPrimary then
+							if not part.Parent:IsA("Tool") then
+								part.Transparency = toggle
+							end
+						end
+					end
+				end
+		
+				local function tgyro()
+					local roll = (gx > 0 and half_pi or -half_pi) - math.atan2(gx, gz)
+					local pitch = math.atan2(gy, (gx * gx + gz * gz) ^ 0.5) * 2
+					local _, rcf = InputService:GetDeviceRotation()
+					local _, _, yaw = rcf:toEulerAnglesXYZ()
+		
+					local acc = InputService:GetDeviceAcceleration().Position
+					local sens = 0.07 
+					local camshift_factor = acc.X
+		
+					if math.abs(camshift_factor) < sens then
+						camshift_factor = 0
+					end
+		
+					local cp = workspace.CurrentCamera.CFrame.Position
+					if mc.ViewportSize.Y > mc.ViewportSize.X then
+						local sd = (select(7, rcf:GetComponents()))
+						mc.CFrame = CFrame.new(cp)
+							* CFrame.Angles(0, sd * 10, -2 * rcf:ToOrientation())
+							* CFrame.Angles(pitch, 0, 0)
+					else
+						mc.CFrame = CFrame.new(cp)
+							* CFrame.Angles(0, yaw * 2, 0) 
+							* CFrame.Angles(pitch * .25, 0, roll) 
+					end
+				end
+		
+				local char = player.Character or player.CharacterAdded:Wait()
+				SetCharacterTransparency(char, 1)
+		
+				mc.CameraType = Enum.CameraType.Custom
+				RunService:BindToRenderStep("Camera", Enum.RenderPriority.Camera.Value + 1, tgyro)
+			end
