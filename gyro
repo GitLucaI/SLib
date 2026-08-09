@@ -3,7 +3,7 @@ local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 local VirtualInputManager = game:GetService("VirtualInputManager")
 local StarterGui = game:GetService("StarterGui")
-
+StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Backpack, false)
 local player = Players.LocalPlayer
 
 if UserInputService.GyroscopeEnabled and UserInputService.AccelerometerEnabled then
