@@ -1,102 +1,432 @@
-local RunService = game:GetService("RunService")
-local CoreGui = game:GetService("CoreGui")
+-- // GUI TO LUA \\ --
 
-local Module = {}
-local currentLayoutOrder = 500
+-- // INSTANCES: 36 | SCRIPTS: 0 | MODULES: 1 \\ --
 
-function Module:CreateTopbarElement(childname, textname, callback)
-	local buttonLayoutOrder = currentLayoutOrder
-	currentLayoutOrder = currentLayoutOrder + 1
-	
-	local toggleState = false
-	local frameCounter = 0
+local UI = {}
 
-	RunService.RenderStepped:Connect(function()
-		frameCounter = (frameCounter or 0) + 1
-		if frameCounter % 15 ~= 0 then return end
+-- // StarterGui.VitaminLib \\ --
+UI["1"] = Instance.new("ScreenGui", game:GetService("CoreGui"))
+UI["1"]["Name"] = [[VitaminLib]]
+UI["1"]["ResetOnSpawn"] = false
 
-		local topBarApp = CoreGui:FindFirstChild("TopBarApp")
-		if not topBarApp then return end
+-- // StarterGui.VitaminLib.Main \\ --
+UI["2"] = Instance.new("Frame", UI["1"])
+UI["2"]["Visible"] = false
+UI["2"]["Active"] = true
+UI["2"]["BackgroundColor3"] = Color3.fromRGB(241, 241, 241)
+UI["2"]["Size"] = UDim2.new(0.22831, 0, 0.31211, 0)
+UI["2"]["Position"] = UDim2.new(0.38552, 0, 0.34332, -2)
+UI["2"]["BorderColor3"] = Color3.fromRGB(161, 161, 161)
+UI["2"]["Name"] = [[Main]]
 
-		local innerTopBarApp = topBarApp:FindFirstChild("TopBarApp")
-		if not innerTopBarApp then return end
+-- // StarterGui.VitaminLib.Main.Container \\ --
+UI["3"] = Instance.new("ScrollingFrame", UI["2"])
+UI["3"]["BorderSizePixel"] = 0
+UI["3"]["CanvasSize"] = UDim2.new(0, 0, 0, 1766)
+UI["3"]["Name"] = [[Container]]
+UI["3"]["Size"] = UDim2.new(0.94286, 0, 0.84, 0)
+UI["3"]["Position"] = UDim2.new(0.02857, 0, 0.16, 0)
+UI["3"]["ScrollBarThickness"] = 6
+UI["3"]["BackgroundTransparency"] = 1
 
-		local unibarLeftFrame = innerTopBarApp:FindFirstChild("UnibarLeftFrame")
-		if not unibarLeftFrame then return end
+-- // StarterGui.VitaminLib.Main.Container.UIListLayout \\ --
+UI["4"] = Instance.new("UIListLayout", UI["3"])
+UI["4"]["Padding"] = UDim.new(0, 8)
+UI["4"]["SortOrder"] = Enum.SortOrder.LayoutOrder
 
-		local unibarMenu = unibarLeftFrame:FindFirstChild("UnibarMenu")
-		if not unibarMenu then return end
+-- // StarterGui.VitaminLib.Main.TitleBar \\ --
+UI["5"] = Instance.new("Frame", UI["2"])
+UI["5"]["BorderSizePixel"] = 0
+UI["5"]["BackgroundColor3"] = Color3.fromRGB(0, 121, 216)
+UI["5"]["Size"] = UDim2.new(1, 0, 0.12, 0)
+UI["5"]["Name"] = [[TitleBar]]
 
-		local subMenuHost = unibarMenu:FindFirstChild("SubMenuHost")
-		if not subMenuHost then return end
+-- // StarterGui.VitaminLib.Main.TitleBar.TitleText \\ --
+UI["6"] = Instance.new("TextLabel", UI["5"])
+UI["6"]["TextWrapped"] = true
+UI["6"]["TextXAlignment"] = Enum.TextXAlignment.Left
+UI["6"]["TextScaled"] = true
+UI["6"]["TextSize"] = 14
+UI["6"]["FontFace"] = Font.new([[rbxasset://fonts/families/SourceSansPro.json]], Enum.FontWeight.Bold, Enum.FontStyle.Normal)
+UI["6"]["TextColor3"] = Color3.fromRGB(255, 255, 255)
+UI["6"]["BackgroundTransparency"] = 1
+UI["6"]["Size"] = UDim2.new(0.71429, 0, 1, 0)
+UI["6"]["Text"] = [[Vitamin Lib]]
+UI["6"]["Name"] = [[TitleText]]
+UI["6"]["Position"] = UDim2.new(0.02857, 0, 0, 0)
 
-		local nineDot = subMenuHost:FindFirstChild("nine_dot")
-		if not nineDot then return end
+-- // StarterGui.VitaminLib.Main.TitleBar.TitleText.UITextSizeConstraint \\ --
+UI["7"] = Instance.new("UITextSizeConstraint", UI["6"])
+UI["7"]["MaxTextSize"] = 14
 
-		local scrollingFrame = nineDot:FindFirstChild("ScrollingFrame")
-		if not scrollingFrame then return end
+-- // StarterGui.VitaminLib.Main.TitleBar.MinButton \\ --
+UI["8"] = Instance.new("TextButton", UI["5"])
+UI["8"]["BorderSizePixel"] = 0
+UI["8"]["TextSize"] = 14
+UI["8"]["TextColor3"] = Color3.fromRGB(255, 255, 255)
+UI["8"]["BackgroundColor3"] = Color3.fromRGB(0, 121, 216)
+UI["8"]["FontFace"] = Font.new([[rbxasset://fonts/families/SourceSansPro.json]], Enum.FontWeight.Regular, Enum.FontStyle.Normal)
+UI["8"]["Size"] = UDim2.new(0.08571, 0, 1, 0)
+UI["8"]["Name"] = [[MinButton]]
+UI["8"]["Text"] = [[🗕]]
+UI["8"]["Position"] = UDim2.new(0.74286, 0, 0, 0)
 
-		local mainCanvas = scrollingFrame:FindFirstChild("MainCanvas")
-		if not mainCanvas then return end
+-- // StarterGui.VitaminLib.Main.TitleBar.MaxButton \\ --
+UI["9"] = Instance.new("TextButton", UI["5"])
+UI["9"]["BorderSizePixel"] = 0
+UI["9"]["TextSize"] = 14
+UI["9"]["TextColor3"] = Color3.fromRGB(255, 255, 255)
+UI["9"]["BackgroundColor3"] = Color3.fromRGB(0, 121, 216)
+UI["9"]["FontFace"] = Font.new([[rbxasset://fonts/families/SourceSansPro.json]], Enum.FontWeight.Regular, Enum.FontStyle.Normal)
+UI["9"]["Size"] = UDim2.new(0.08571, 0, 1, 0)
+UI["9"]["Name"] = [[MaxButton]]
+UI["9"]["Text"] = [[🗖]]
+UI["9"]["Position"] = UDim2.new(0.82857, 0, 0, 0)
 
-		local existingBtn = mainCanvas:FindFirstChild(childname)
-		if existingBtn then
-			if callback and not existingBtn:GetAttribute("HasCallbackConnected") then
-				existingBtn:SetAttribute("HasCallbackConnected", true)
-				local clickTarget = existingBtn:IsA("GuiButton") and existingBtn or existingBtn:FindFirstChildWhichIsA("GuiButton", true)
-				if clickTarget then
-					clickTarget.Activated:Connect(function()
-						toggleState = not toggleState
-						callback(toggleState)
-					end)
-				end
-			end
-			return
-		end
+-- // StarterGui.VitaminLib.Main.TitleBar.CloseButton \\ --
+UI["a"] = Instance.new("TextButton", UI["5"])
+UI["a"]["BorderSizePixel"] = 0
+UI["a"]["TextSize"] = 14
+UI["a"]["TextColor3"] = Color3.fromRGB(255, 255, 255)
+UI["a"]["BackgroundColor3"] = Color3.fromRGB(0, 121, 216)
+UI["a"]["FontFace"] = Font.new([[rbxasset://fonts/families/SourceSansPro.json]], Enum.FontWeight.Bold, Enum.FontStyle.Normal)
+UI["a"]["Size"] = UDim2.new(0.08571, 0, 1, 0)
+UI["a"]["Name"] = [[CloseButton]]
+UI["a"]["Text"] = [[X]]
+UI["a"]["Position"] = UDim2.new(0.91429, 0, 0, 0)
 
-		local template = mainCanvas:FindFirstChild("trust_and_safety")
-		if not template then return end
+-- // StarterGui.VitaminLib.Main.UIAspectRatioConstraint \\ --
+UI["b"] = Instance.new("UIAspectRatioConstraint", UI["2"])
+UI["b"]["AspectRatio"] = 1.4
 
-		local newbtn = template:Clone()
-		
-		for _, descendant in ipairs(newbtn:GetDescendants()) do
-			if descendant:IsA("LocalScript") or descendant:IsA("Script") then
-				descendant:Destroy()
-			end
-		end
+-- // StarterGui.VitaminLib.Notifications \\ --
+UI["c"] = Instance.new("Folder", UI["1"])
+UI["c"]["Name"] = [[Notifications]]
 
-		local currentSize = mainCanvas.CanvasSize
-		mainCanvas.CanvasSize = UDim2.new(currentSize.X.Scale, currentSize.X.Offset, currentSize.Y.Scale + 0.055, currentSize.Y.Offset)
+-- // StarterGui.VitaminLib.Notifications.UIListLayout \\ --
+UI["d"] = Instance.new("UIListLayout", UI["c"])
+UI["d"]["HorizontalAlignment"] = Enum.HorizontalAlignment.Right
+UI["d"]["Padding"] = UDim.new(0, 10)
+UI["d"]["VerticalAlignment"] = Enum.VerticalAlignment.Bottom
+UI["d"]["SortOrder"] = Enum.SortOrder.LayoutOrder
 
-		newbtn.Name = childname
-		newbtn.LayoutOrder = buttonLayoutOrder
+-- // StarterGui.VitaminLib.Operate \\ --
+UI["e"] = Instance.new("ModuleScript", UI["1"])
+UI["e"]["Name"] = [[Operate]]
 
-		local textLabel = newbtn:FindFirstChild("RowLabel", true) 
-			and newbtn.RowLabel:FindFirstChild("Label", true) 
-			and newbtn.RowLabel.Label:FindFirstChild("StyledTextLabel", true)
+-- // StarterGui.VitaminLib.Operate.LabelTemplate \\ --
+UI["f"] = Instance.new("TextLabel", UI["e"])
+UI["f"]["TextWrapped"] = true
+UI["f"]["TextXAlignment"] = Enum.TextXAlignment.Left
+UI["f"]["TextScaled"] = true
+UI["f"]["TextSize"] = 14
+UI["f"]["FontFace"] = Font.new([[rbxasset://fonts/families/SourceSansPro.json]], Enum.FontWeight.Regular, Enum.FontStyle.Normal)
+UI["f"]["TextColor3"] = Color3.fromRGB(0, 0, 0)
+UI["f"]["BackgroundTransparency"] = 1
+UI["f"]["Size"] = UDim2.new(0.97, 0, 0.017, 0)
+UI["f"]["Name"] = [[LabelTemplate]]
 
-		if textLabel then
-			textLabel.Text = textname
-		elseif newbtn:IsA("TextButton") or newbtn:IsA("TextBox") then
-			newbtn.Text = textname
-		elseif newbtn:FindFirstChildWhichIsA("TextLabel", true) then
-			newbtn:FindFirstChildWhichIsA("TextLabel", true).Text = textname
-		end
+-- // StarterGui.VitaminLib.Operate.LabelTemplate.UITextSizeConstraint \\ --
+UI["10"] = Instance.new("UITextSizeConstraint", UI["f"])
+UI["10"]["MaxTextSize"] = 14
 
-		if callback then
-			newbtn:SetAttribute("HasCallbackConnected", true)
-			local clickTarget = newbtn:IsA("GuiButton") and newbtn or newbtn:FindFirstChildWhichIsA("GuiButton", true)
-			
-			if clickTarget then
-				clickTarget.Activated:Connect(function()
-					toggleState = not toggleState
-					callback(toggleState)
-				end)
-			end
-		end
+-- // StarterGui.VitaminLib.Operate.ButtonTemplate \\ --
+UI["11"] = Instance.new("TextButton", UI["e"])
+UI["11"]["TextWrapped"] = true
+UI["11"]["TextSize"] = 14
+UI["11"]["TextColor3"] = Color3.fromRGB(0, 0, 0)
+UI["11"]["TextScaled"] = true
+UI["11"]["BackgroundColor3"] = Color3.fromRGB(226, 226, 226)
+UI["11"]["FontFace"] = Font.new([[rbxasset://fonts/families/SourceSansPro.json]], Enum.FontWeight.Regular, Enum.FontStyle.Normal)
+UI["11"]["Size"] = UDim2.new(0.97, 0, 0.017, 0)
+UI["11"]["Name"] = [[ButtonTemplate]]
+UI["11"]["BorderColor3"] = Color3.fromRGB(174, 174, 174)
 
-		newbtn.Parent = mainCanvas
-	end)
+-- // StarterGui.VitaminLib.Operate.ButtonTemplate.UITextSizeConstraint \\ --
+UI["12"] = Instance.new("UITextSizeConstraint", UI["11"])
+UI["12"]["MaxTextSize"] = 14
+
+-- // StarterGui.VitaminLib.Operate.ToggleTemplate \\ --
+UI["13"] = Instance.new("Frame", UI["e"])
+UI["13"]["Size"] = UDim2.new(0.97, 0, 0.017, 0)
+UI["13"]["Name"] = [[ToggleTemplate]]
+UI["13"]["BackgroundTransparency"] = 1
+
+-- // StarterGui.VitaminLib.Operate.ToggleTemplate.TextButton \\ --
+UI["14"] = Instance.new("TextButton", UI["13"])
+UI["14"]["TextSize"] = 14
+UI["14"]["TextColor3"] = Color3.fromRGB(0, 121, 216)
+UI["14"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
+UI["14"]["FontFace"] = Font.new([[rbxasset://fonts/families/SourceSansPro.json]], Enum.FontWeight.Bold, Enum.FontStyle.Normal)
+UI["14"]["Size"] = UDim2.new(0.05625, 0, 0.6, 0)
+UI["14"]["BorderColor3"] = Color3.fromRGB(101, 101, 101)
+UI["14"]["Text"] = [[]]
+UI["14"]["Position"] = UDim2.new(0.00625, 0, 0.2, 0)
+
+-- // StarterGui.VitaminLib.Operate.ToggleTemplate.TextLabel \\ --
+UI["15"] = Instance.new("TextLabel", UI["13"])
+UI["15"]["TextWrapped"] = true
+UI["15"]["TextXAlignment"] = Enum.TextXAlignment.Left
+UI["15"]["TextScaled"] = true
+UI["15"]["TextSize"] = 14
+UI["15"]["FontFace"] = Font.new([[rbxasset://fonts/families/SourceSansPro.json]], Enum.FontWeight.Regular, Enum.FontStyle.Normal)
+UI["15"]["TextColor3"] = Color3.fromRGB(0, 0, 0)
+UI["15"]["BackgroundTransparency"] = 1
+UI["15"]["Size"] = UDim2.new(0.90625, 0, 1, 0)
+UI["15"]["Text"] = [[Toggle]]
+UI["15"]["Position"] = UDim2.new(0.0875, 0, 0, 0)
+
+-- // StarterGui.VitaminLib.Operate.ToggleTemplate.TextLabel.UITextSizeConstraint \\ --
+UI["16"] = Instance.new("UITextSizeConstraint", UI["15"])
+UI["16"]["MaxTextSize"] = 14
+
+-- // StarterGui.VitaminLib.Operate.BoxTemplate \\ --
+UI["17"] = Instance.new("Frame", UI["e"])
+UI["17"]["Size"] = UDim2.new(0.97, 0, 0.017, 0)
+UI["17"]["Position"] = UDim2.new(0, 0, 0.21687, 0)
+UI["17"]["Name"] = [[BoxTemplate]]
+UI["17"]["BackgroundTransparency"] = 1
+
+-- // StarterGui.VitaminLib.Operate.BoxTemplate.TextButton \\ --
+UI["18"] = Instance.new("TextButton", UI["17"])
+UI["18"]["TextWrapped"] = true
+UI["18"]["TextSize"] = 14
+UI["18"]["TextColor3"] = Color3.fromRGB(0, 0, 0)
+UI["18"]["TextScaled"] = true
+UI["18"]["BackgroundColor3"] = Color3.fromRGB(226, 226, 226)
+UI["18"]["FontFace"] = Font.new([[rbxasset://fonts/families/SourceSansPro.json]], Enum.FontWeight.Regular, Enum.FontStyle.Normal)
+UI["18"]["Size"] = UDim2.new(0.3, 0, 1, 0)
+UI["18"]["BorderColor3"] = Color3.fromRGB(174, 174, 174)
+UI["18"]["Text"] = [[Set]]
+UI["18"]["Position"] = UDim2.new(0.7125, 0, 0, 0)
+
+-- // StarterGui.VitaminLib.Operate.BoxTemplate.TextButton.UITextSizeConstraint \\ --
+UI["19"] = Instance.new("UITextSizeConstraint", UI["18"])
+UI["19"]["MaxTextSize"] = 14
+
+-- // StarterGui.VitaminLib.Operate.BoxTemplate.TextBox \\ --
+UI["1a"] = Instance.new("TextBox", UI["17"])
+UI["1a"]["CursorPosition"] = -1
+UI["1a"]["TextColor3"] = Color3.fromRGB(0, 0, 0)
+UI["1a"]["TextXAlignment"] = Enum.TextXAlignment.Left
+UI["1a"]["TextWrapped"] = true
+UI["1a"]["TextSize"] = 14
+UI["1a"]["TextScaled"] = true
+UI["1a"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
+UI["1a"]["FontFace"] = Font.new([[rbxasset://fonts/families/SourceSansPro.json]], Enum.FontWeight.Regular, Enum.FontStyle.Normal)
+UI["1a"]["ClearTextOnFocus"] = false
+UI["1a"]["PlaceholderText"] = [[Placeholder]]
+UI["1a"]["Size"] = UDim2.new(0.68437, 0, 1, 0)
+UI["1a"]["BorderColor3"] = Color3.fromRGB(174, 174, 174)
+UI["1a"]["Text"] = [[]]
+
+-- // StarterGui.VitaminLib.Operate.BoxTemplate.TextBox.UITextSizeConstraint \\ --
+UI["1b"] = Instance.new("UITextSizeConstraint", UI["1a"])
+UI["1b"]["MaxTextSize"] = 14
+
+-- // StarterGui.VitaminLib.Operate.Notification \\ --
+UI["1c"] = Instance.new("Frame", UI["e"])
+UI["1c"]["Visible"] = false
+UI["1c"]["Active"] = true
+UI["1c"]["BackgroundColor3"] = Color3.fromRGB(241, 241, 241)
+UI["1c"]["Size"] = UDim2.new(0.18265, 0, 0.14981, 0)
+UI["1c"]["Position"] = UDim2.new(1, -300, 1, -270)
+UI["1c"]["BorderColor3"] = Color3.fromRGB(161, 161, 161)
+UI["1c"]["Name"] = [[Notification]]
+
+-- // StarterGui.VitaminLib.Operate.Notification.TitleBar \\ --
+UI["1d"] = Instance.new("Frame", UI["1c"])
+UI["1d"]["BorderSizePixel"] = 0
+UI["1d"]["BackgroundColor3"] = Color3.fromRGB(0, 121, 216)
+UI["1d"]["Size"] = UDim2.new(1, 0, 0.21667, 0)
+UI["1d"]["Name"] = [[TitleBar]]
+
+-- // StarterGui.VitaminLib.Operate.Notification.TitleBar.TitleText \\ --
+UI["1e"] = Instance.new("TextLabel", UI["1d"])
+UI["1e"]["TextWrapped"] = true
+UI["1e"]["TextXAlignment"] = Enum.TextXAlignment.Left
+UI["1e"]["TextScaled"] = true
+UI["1e"]["TextSize"] = 14
+UI["1e"]["FontFace"] = Font.new([[rbxasset://fonts/families/SourceSansPro.json]], Enum.FontWeight.Bold, Enum.FontStyle.Normal)
+UI["1e"]["TextColor3"] = Color3.fromRGB(255, 255, 255)
+UI["1e"]["BackgroundTransparency"] = 1
+UI["1e"]["Size"] = UDim2.new(0.96429, 0, 1, 0)
+UI["1e"]["Text"] = [[Notification]]
+UI["1e"]["Name"] = [[TitleText]]
+UI["1e"]["Position"] = UDim2.new(0.03571, 0, 0, 0)
+
+-- // StarterGui.VitaminLib.Operate.Notification.TitleBar.TitleText.UITextSizeConstraint \\ --
+UI["1f"] = Instance.new("UITextSizeConstraint", UI["1e"])
+UI["1f"]["MaxTextSize"] = 14
+
+-- // StarterGui.VitaminLib.Operate.Notification.Description \\ --
+UI["20"] = Instance.new("TextLabel", UI["1c"])
+UI["20"]["TextWrapped"] = true
+UI["20"]["TextXAlignment"] = Enum.TextXAlignment.Left
+UI["20"]["TextYAlignment"] = Enum.TextYAlignment.Top
+UI["20"]["TextScaled"] = true
+UI["20"]["TextSize"] = 14
+UI["20"]["FontFace"] = Font.new([[rbxasset://fonts/families/SourceSansPro.json]], Enum.FontWeight.Regular, Enum.FontStyle.Normal)
+UI["20"]["TextColor3"] = Color3.fromRGB(0, 0, 0)
+UI["20"]["BackgroundTransparency"] = 1
+UI["20"]["Size"] = UDim2.new(0.92857, 0, 0.45, 0)
+UI["20"]["Text"] = [[Description]]
+UI["20"]["Name"] = [[Description]]
+UI["20"]["Position"] = UDim2.new(0.03571, 0, 0.26667, 0)
+
+-- // StarterGui.VitaminLib.Operate.Notification.Description.UITextSizeConstraint \\ --
+UI["21"] = Instance.new("UITextSizeConstraint", UI["20"])
+UI["21"]["MaxTextSize"] = 14
+
+-- // StarterGui.VitaminLib.Operate.Notification.Close \\ --
+UI["22"] = Instance.new("TextButton", UI["1c"])
+UI["22"]["TextWrapped"] = true
+UI["22"]["TextSize"] = 14
+UI["22"]["TextColor3"] = Color3.fromRGB(0, 0, 0)
+UI["22"]["TextScaled"] = true
+UI["22"]["BackgroundColor3"] = Color3.fromRGB(226, 226, 226)
+UI["22"]["FontFace"] = Font.new([[rbxasset://fonts/families/SourceSansPro.json]], Enum.FontWeight.Regular, Enum.FontStyle.Normal)
+UI["22"]["Size"] = UDim2.new(0.25, 0, 0.2, 0)
+UI["22"]["Name"] = [[Close]]
+UI["22"]["BorderColor3"] = Color3.fromRGB(174, 174, 174)
+UI["22"]["Text"] = [[OK (10)]]
+UI["22"]["Position"] = UDim2.new(0.71429, 0, 0.71667, 0)
+
+-- // StarterGui.VitaminLib.Operate.Notification.Close.UITextSizeConstraint \\ --
+UI["23"] = Instance.new("UITextSizeConstraint", UI["22"])
+UI["23"]["MaxTextSize"] = 14
+
+-- // StarterGui.VitaminLib.Operate.Notification.UIAspectRatioConstraint \\ --
+UI["24"] = Instance.new("UIAspectRatioConstraint", UI["1c"])
+UI["24"]["AspectRatio"] = 2.33333
+
+-- Require G2L wrapper
+local G2L_REQUIRE = require;
+local G2L_MODULES = {};
+local function require(Module:ModuleScript)
+    local ModuleState = G2L_MODULES[Module];
+    if ModuleState then
+        if not ModuleState.Required then
+            ModuleState.Required = true;
+            ModuleState.Value = ModuleState.Closure();
+        end
+        return ModuleState.Value;
+    end;
+    return G2L_REQUIRE(Module);
 end
 
-return Module
+G2L_MODULES[UI["e"]] = {
+Closure = function()
+    local script = UI["e"]
+local module = {}
+local main = script.Parent
+
+function module:CreateWindow(windowname)
+	local isMinimized = false
+	local isMaximized = false
+	local normalSize = main.Main.Size
+	local normalPosition = main.Main.Position
+	local MaxButton = main.Main.TitleBar.MaxButton
+	local MinButton = main.Main.TitleBar.MinButton
+	local CloseButton = main.Main.TitleBar.CloseButton
+	local MainWindow = main.Main
+	local UIListLayout = main.Main.ContentContainer.UIListLayout
+	local TextboxTemplate = script.BoxTemplate
+	local LabelTemplate = script.LabelTemplate
+	local ButtonTemplate = script.ButtonTemplate
+	local ToggleTemplate = script.ToggleTemplate
+	local NotificationTemplate = script.Notification
+	local window = main.Main
+	window.TitleBar.TitleText = windowname
+	window.Visible = true
+	MaxButton.MouseEnter:Connect(function() MaxButton.BackgroundColor3 = Color3.fromRGB(45, 140, 225) end)
+	MaxButton.MouseLeave:Connect(function() MaxButton.BackgroundColor3 = Color3.fromRGB(0, 120, 215) end)
+	MaxButton.MouseButton1Click:Connect(function()
+		if isMinimized then return end
+		if isMaximized then
+			MainWindow.Size = normalSize
+			MainWindow.Position = normalPosition
+			MainWindow.Draggable = true
+			MaxButton.Text = "🗖"
+			isMaximized = false
+		else
+			normalSize = main.Main.Size
+			normalPosition = main.Main.Position
+			MainWindow.Size = UDim2.new(1, 0, 1, 0)
+			MainWindow.Position = UDim2.new(0, 0, 0, 0)
+			MainWindow.Draggable = false
+			MaxButton.Text = "🗗"
+			isMaximized = true
+		end
+	end)
+	CloseButton.MouseEnter:Connect(function() CloseButton.BackgroundColor3 = Color3.fromRGB(232, 17, 35) end)
+	CloseButton.MouseLeave:Connect(function() CloseButton.BackgroundColor3 = Color3.fromRGB(0, 120, 215) end)
+	CloseButton.MouseButton1Click:Connect(function() main:Destroy() end)
+	
+	function module:CreateTextBox(placeholder, callback)
+		local TextBox = TextboxTemplate:Clone()
+		TextBox.Parent = main.Main.ContentContainer
+		TextBox.PlaceholderText = placeholder
+		TextBox.TextButton.MouseButton1Click:Connect(function()
+			callback(TextBox.Text)
+		end)
+	end
+	
+	function module:CreateLabel(text)
+		local Label = LabelTemplate:Clone()
+		Label.Parent = main.Main.ContentContainer
+		Label.Text = text
+	end
+	
+	function module:CreateButton(text, callback)
+		local Button = ButtonTemplate:Clone()
+		Button.Parent = main.Main.ContentContainer
+		Button.Text = text
+		Button.MouseButton1Click:Connect(function()
+			if callback then callback() end
+		end)
+	end
+	
+	function module:CreateToggle(text, default, callback)
+		local toggled = default or false
+		local Toggle = ToggleTemplate:Clone()
+		Toggle.Parent = main.Main.ContentContainer
+		Toggle.Text = text
+		local function update()
+			Toggle.Checkbox.Text = toggled and "✓" or ""
+			if callback then callback(toggled) end
+		end
+		Toggle.Checkbox.MouseButton1Click:Connect(function()
+			toggled = not toggled
+			update()
+		end)
+	end
+	
+	function module:CreateNotification(text, desc, duration)
+		local Notification = NotificationTemplate:Clone()
+		Notification.TitleBar.TitleText.Text = text
+		Notification.Description.Text = desc
+		
+		Notification.TitleBar.CloseButton.MouseButton1Click:Connect(function()
+			Notification:Destroy()
+		end)
+		
+		Notification.Parent = main.Main.Notifications
+		Notification.Visible = true
+		
+		for i = 1, duration do
+			task.wait(1)
+			Notification.TitleBar.TitleText.Text = text.." ("..(duration - i)..")"
+		end
+		
+		task.wait()
+		Notification:Destroy()
+	end
+end
+
+return module
+
+end
+}
+
+return UI["1"], require;
