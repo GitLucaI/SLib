@@ -1,0 +1,74 @@
+local RunService = game:GetService("RunService")
+local CoreGui = game:GetService("CoreGui")
+
+local Module = {}
+
+function Module:CreateTopbarElement(childname, textname, callback)
+	local frameCounter = 0
+	RunService.RenderStepped:Connect(function()
+		frameCounter = (frameCounter or 0) + 1
+		if frameCounter % 15 ~= 0 then return end
+
+		local topBarApp = CoreGui:FindFirstChild("TopBarApp")
+		if not topBarApp then return end
+
+		local innerTopBarApp = topBarApp:FindFirstChild("TopBarApp")
+		if not innerTopBarApp then return end
+
+		local unibarLeftFrame = innerTopBarApp:FindFirstChild("UnibarLeftFrame")
+		if not unibarLeftFrame then return end
+
+		local unibarMenu = unibarLeftFrame:FindFirstChild("UnibarMenu")
+		if not unibarMenu then return end
+
+		local subMenuHost = unibarMenu:FindFirstChild("SubMenuHost")
+		if not subMenuHost then return end
+
+		local nineDot = subMenuHost:FindFirstChild("nine_dot")
+		if not nineDot then return end
+
+		local scrollingFrame = nineDot:FindFirstChild("ScrollingFrame")
+		if not scrollingFrame then return end
+
+		local mainCanvas = scrollingFrame:FindFirstChild("MainCanvas")
+		if not mainCanvas then return end
+
+		local existingBtn = mainCanvas:FindFirstChild(childname)
+		if existingBtn then
+			if callback and not existingBtn:GetAttribute("HasCallbackConnected") then
+				existingBtn:SetAttribute("HasCallbackConnected", true)
+				existingBtn.MouseButton1Click:Connect(callback)
+			end
+			return
+		end
+
+		local template = mainCanvas:FindFirstChild("trust_and_safety")
+		if not template then return end
+
+		local newbtn = template:Clone()
+		mainCanvas.CanvasSize = UDim2.new(mainCanvas.CanvasSize.X.Scale, mainCanvas.CanvasSize.X.Offset, mainCanvas.CanvasSize.Y.Scale, mainCanvas.CanvasSize.Y.Offset + 0.055)
+		newbtn.Name = childname
+		newbtn.LayoutOrder = 999
+
+		local textLabel = newbtn:FindFirstChild("RowLabel", true) 
+			and newbtn.RowLabel:FindFirstChild("Label", true) 
+			and newbtn.RowLabel.Label:FindFirstChild("StyledTextLabel", true)
+
+		if textLabel then
+			textLabel.Text = textname
+		elseif newbtn:IsA("TextButton") or newbtn:IsA("TextBox") then
+			newbtn.Text = textname
+		elseif newbtn:FindFirstChildOfClass("TextLabel") then
+			newbtn:FindFirstChildOfClass("TextLabel").Text = textname
+		end
+
+		if callback then
+			newbtn:SetAttribute("HasCallbackConnected", true)
+			newbtn.MouseButton1Click:Connect(callback)
+		end
+
+		newbtn.Parent = mainCanvas
+	end)
+end
+
+return Module
