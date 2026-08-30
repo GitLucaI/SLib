@@ -279,6 +279,27 @@ Closure = function()
 	local script = UI["e"]
 	local module = {}
 	local main = script.Parent
+	local HttpService = game:GetService("HttpService")
+
+	local SaveFileName = "VitaminLib_AutoSave.json"
+	local SaveData = {}
+
+	if isfile and isfile(SaveFileName) then
+		local success, result = pcall(function()
+			return HttpService:JSONDecode(readfile(SaveFileName))
+		end)
+		if success and type(result) == "table" then
+			SaveData = result
+		end
+	end
+
+	local function Save()
+		if writefile then
+			pcall(function()
+				writefile(SaveFileName, HttpService:JSONEncode(SaveData))
+			end)
+		end
+	end
 
 	function module:CreateWindow(windowname)
 		local isMinimized = false
@@ -289,15 +310,16 @@ Closure = function()
 		local MinButton = main.Main.TitleBar.MinButton
 		local CloseButton = main.Main.TitleBar.CloseButton
 		local MainWindow = main.Main
-		local UIListLayout = main.Main.Container.UIListLayout 
 		local TextboxTemplate = script.BoxTemplate
 		local LabelTemplate = script.LabelTemplate
 		local ButtonTemplate = script.ButtonTemplate
 		local ToggleTemplate = script.ToggleTemplate
 		local NotificationTemplate = script.Notification
 		local window = main.Main
+
 		window.TitleBar.TitleText.Text = windowname 
 		window.Visible = true
+
 		MaxButton.MouseEnter:Connect(function() MaxButton.BackgroundColor3 = Color3.fromRGB(45, 140, 225) end)
 		MaxButton.MouseLeave:Connect(function() MaxButton.BackgroundColor3 = Color3.fromRGB(0, 120, 215) end)
 		MaxButton.MouseButton1Click:Connect(function()
@@ -318,6 +340,7 @@ Closure = function()
 				isMaximized = true
 			end
 		end)
+
 		CloseButton.MouseEnter:Connect(function() CloseButton.BackgroundColor3 = Color3.fromRGB(232, 17, 35) end)
 		CloseButton.MouseLeave:Connect(function() CloseButton.BackgroundColor3 = Color3.fromRGB(0, 120, 215) end)
 		CloseButton.MouseButton1Click:Connect(function() main:Destroy() end)
@@ -326,8 +349,15 @@ Closure = function()
 			local TextBox = TextboxTemplate:Clone()
 			TextBox.Parent = main.Main.Container
 			TextBox.TextBox.PlaceholderText = placeholder
+
+			if SaveData[placeholder] ~= nil then
+				TextBox.TextBox.Text = SaveData[placeholder]
+			end
+
 			TextBox.TextButton.MouseButton1Click:Connect(function()
-				callback(TextBox.TextBox.Text)
+				SaveData[placeholder] = TextBox.TextBox.Text
+				Save()
+				if callback then callback(TextBox.TextBox.Text) end
 			end)
 		end
 		
@@ -348,17 +378,30 @@ Closure = function()
 		
 		function module:CreateToggle(text, default, callback)
 			local toggled = default or false
+			
+			if SaveData[text] ~= nil then
+				toggled = SaveData[text]
+			else
+				SaveData[text] = toggled
+			end
+
 			local Toggle = ToggleTemplate:Clone()
 			Toggle.Parent = main.Main.Container
 			Toggle.TextLabel.Text = text
+
 			local function update()
 				Toggle.TextButton.Text = toggled and "✓" or ""
+				SaveData[text] = toggled
+				Save()
 				if callback then callback(toggled) end
 			end
+
 			Toggle.TextButton.MouseButton1Click:Connect(function()
 				toggled = not toggled
 				update()
 			end)
+
+			update()
 		end
 		
 		function module:CreateNotification(text, desc, duration)
@@ -373,13 +416,16 @@ Closure = function()
 			Notification.Parent = main.Notifications
 			Notification.Visible = true
 			
-			for i = 1, duration do
-				task.wait(1)
-				Notification.Close.Text = "OK ("..(duration - i)..")"
-			end
-			
-			task.wait()
-			Notification:Destroy()
+			task.spawn(function()
+				for i = 1, duration do
+					task.wait(1)
+					if not Notification or not Notification.Parent then return end
+					Notification.Close.Text = "OK ("..(duration - i)..")"
+				end
+				if Notification and Notification.Parent then
+					Notification:Destroy()
+				end
+			end)
 		end
 	end
 
