@@ -365,7 +365,7 @@ function module:CreateWindow(windowname)
 	local ToggleTemplate = script.ToggleTemplate
 	local NotificationTemplate = script.Notification
 	local window = main.Main
-	window.TitleBar.TitleText = windowname
+	window.TitleBar.TitleText.Text = windowname
 	window.Visible = true
 
 	MaxButton.MouseEnter:Connect(function() MaxButton.BackgroundColor3 = Color3.fromRGB(45, 140, 225) end)
@@ -539,8 +539,10 @@ function module:CreateWindow(windowname)
 		newbtn.Parent = mainCanvas
 	end)
 end
-
 return module
+
+
+
 end
 }
 
