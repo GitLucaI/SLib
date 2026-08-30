@@ -358,7 +358,7 @@ function module:CreateWindow(windowname)
 	local MinButton = main.Main.TitleBar.MinButton
 	local CloseButton = main.Main.TitleBar.CloseButton
 	local MainWindow = main.Main
-	local UIListLayout = main.Main.ContentContainer.UIListLayout
+	local UIListLayout = main.Main.Container.UIListLayout
 	local TextboxTemplate = script.BoxTemplate
 	local LabelTemplate = script.LabelTemplate
 	local ButtonTemplate = script.ButtonTemplate
@@ -399,7 +399,7 @@ function module:CreateWindow(windowname)
 
 	function module:CreateTextBox(placeholder, callback)
 		local TextBox = TextboxTemplate:Clone()
-		TextBox.Parent = main.Main.ContentContainer
+		TextBox.Parent = main.Main.Container
 		TextBox.PlaceholderText = placeholder
 		TextBox.TextButton.MouseButton1Click:Connect(function()
 			callback(TextBox.Text)
@@ -408,13 +408,13 @@ function module:CreateWindow(windowname)
 
 	function module:CreateLabel(text)
 		local Label = LabelTemplate:Clone()
-		Label.Parent = main.Main.ContentContainer
+		Label.Parent = main.Main.Container
 		Label.Text = text
 	end
 
 	function module:CreateButton(text, callback)
 		local Button = ButtonTemplate:Clone()
-		Button.Parent = main.Main.ContentContainer
+		Button.Parent = main.Main.Container
 		Button.Text = text
 		Button.MouseButton1Click:Connect(function()
 			if callback then callback() end
@@ -428,7 +428,7 @@ function module:CreateWindow(windowname)
 
 		local toggled = default or false
 		local Toggle = ToggleTemplate:Clone()
-		Toggle.Parent = main.Main.ContentContainer
+		Toggle.Parent = main.Main.Container
 		Toggle.Text = text
 
 		local function update()
