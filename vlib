@@ -2,9 +2,15 @@ local RunService = game:GetService("RunService")
 local CoreGui = game:GetService("CoreGui")
 
 local Module = {}
+local currentLayoutOrder = 500
 
 function Module:CreateTopbarElement(childname, textname, callback)
+	local buttonLayoutOrder = currentLayoutOrder
+	currentLayoutOrder = currentLayoutOrder + 1
+	
+	local toggleState = false
 	local frameCounter = 0
+
 	RunService.RenderStepped:Connect(function()
 		frameCounter = (frameCounter or 0) + 1
 		if frameCounter % 15 ~= 0 then return end
@@ -37,10 +43,12 @@ function Module:CreateTopbarElement(childname, textname, callback)
 		if existingBtn then
 			if callback and not existingBtn:GetAttribute("HasCallbackConnected") then
 				existingBtn:SetAttribute("HasCallbackConnected", true)
-				if existingBtn.Activated then
-					existingBtn.Activated:Connect(callback)
-				elseif existingBtn.MouseButton1Click then
-					existingBtn.MouseButton1Click:Connect(callback)
+				local clickTarget = existingBtn:IsA("GuiButton") and existingBtn or existingBtn:FindFirstChildWhichIsA("GuiButton", true)
+				if clickTarget then
+					clickTarget.Activated:Connect(function()
+						toggleState = not toggleState
+						callback(toggleState)
+					end)
 				end
 			end
 			return
@@ -51,14 +59,17 @@ function Module:CreateTopbarElement(childname, textname, callback)
 
 		local newbtn = template:Clone()
 		
-		local currentSize = mainCanvas.CanvasSize
-		local yOffset = currentSize.Y.Offset
-		if type(yOffset) == "number" then
-			mainCanvas.CanvasSize = UDim2.new(currentSize.X.Scale, currentSize.X.Offset, currentSize.Y.Scale, yOffset + 55)
+		for _, descendant in ipairs(newbtn:GetDescendants()) do
+			if descendant:IsA("LocalScript") or descendant:IsA("Script") then
+				descendant:Destroy()
+			end
 		end
 
+		local currentSize = mainCanvas.CanvasSize
+		mainCanvas.CanvasSize = UDim2.new(currentSize.X.Scale, currentSize.X.Offset, currentSize.Y.Scale + 0.055, currentSize.Y.Offset)
+
 		newbtn.Name = childname
-		newbtn.LayoutOrder = 999
+		newbtn.LayoutOrder = buttonLayoutOrder
 
 		local textLabel = newbtn:FindFirstChild("RowLabel", true) 
 			and newbtn.RowLabel:FindFirstChild("Label", true) 
@@ -68,16 +79,19 @@ function Module:CreateTopbarElement(childname, textname, callback)
 			textLabel.Text = textname
 		elseif newbtn:IsA("TextButton") or newbtn:IsA("TextBox") then
 			newbtn.Text = textname
-		elseif newbtn:FindFirstChildOfClass("TextLabel") then
-			newbtn:FindFirstChildOfClass("TextLabel").Text = textname
+		elseif newbtn:FindFirstChildWhichIsA("TextLabel", true) then
+			newbtn:FindFirstChildWhichIsA("TextLabel", true).Text = textname
 		end
 
 		if callback then
 			newbtn:SetAttribute("HasCallbackConnected", true)
-			if newbtn.Activated then
-				newbtn.Activated:Connect(callback)
-			elseif newbtn.MouseButton1Click then
-				newbtn.MouseButton1Click:Connect(callback)
+			local clickTarget = newbtn:IsA("GuiButton") and newbtn or newbtn:FindFirstChildWhichIsA("GuiButton", true)
+			
+			if clickTarget then
+				clickTarget.Activated:Connect(function()
+					toggleState = not toggleState
+					callback(toggleState)
+				end)
 			end
 		end
 
