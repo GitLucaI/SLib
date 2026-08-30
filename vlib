@@ -1,0 +1,186 @@
+local HttpService = game:GetService("HttpService")
+local module = {
+	Config = {},
+	SaveName = nil,
+	Elements = {}
+}
+local main = script.Parent
+
+function module:SaveConfig()
+	if not module.SaveName then return end
+	if writefile then
+		pcall(function()
+			local json = HttpService:JSONEncode(module.Config)
+			writefile(module.SaveName, json)
+		end)
+	end
+end
+
+function module:CreateWindow(windowname)
+	local isMinimized = false
+	local isMaximized = false
+	local normalSize = main.Main.Size
+	local normalPosition = main.Main.Position
+	local MaxButton = main.Main.TitleBar.MaxButton
+	local MinButton = main.Main.TitleBar.MinButton
+	local CloseButton = main.Main.TitleBar.CloseButton
+	local MainWindow = main.Main
+	local UIListLayout = main.Main.ContentContainer.UIListLayout
+	local TextboxTemplate = script.BoxTemplate
+	local LabelTemplate = script.LabelTemplate
+	local ButtonTemplate = script.ButtonTemplate
+	local ToggleTemplate = script.ToggleTemplate
+	local NotificationTemplate = script.Notification
+	local window = main.Main
+	
+	window.TitleBar.TitleText = windowname
+	window.Visible = true
+	
+	MaxButton.MouseEnter:Connect(function() MaxButton.BackgroundColor3 = Color3.fromRGB(45, 140, 225) end)
+	MaxButton.MouseLeave:Connect(function() MaxButton.BackgroundColor3 = Color3.fromRGB(0, 120, 215) end)
+	MaxButton.MouseButton1Click:Connect(function()
+		if isMinimized then return end
+		if isMaximized then
+			MainWindow.Size = normalSize
+			MainWindow.Position = normalPosition
+			MainWindow.Draggable = true
+			MaxButton.Text = "🗖"
+			isMaximized = false
+		else
+			normalSize = main.Main.Size
+			normalPosition = main.Main.Position
+			MainWindow.Size = UDim2.new(1, 0, 1, 0)
+			MainWindow.Position = UDim2.new(0, 0, 0, 0)
+			MainWindow.Draggable = false
+			MaxButton.Text = "🗗"
+			isMaximized = true
+		end
+	end)
+	
+	CloseButton.MouseEnter:Connect(function() CloseButton.BackgroundColor3 = Color3.fromRGB(232, 17, 35) end)
+	CloseButton.MouseLeave:Connect(function() CloseButton.BackgroundColor3 = Color3.fromRGB(0, 120, 215) end)
+	CloseButton.MouseButton1Click:Connect(function() main:Destroy() end)
+	
+	function module:EnableAutoSave(fileName)
+		module.SaveName = fileName
+		
+		if isfile and readfile and isfile(fileName) then
+			local success, result = pcall(function()
+				return HttpService:JSONDecode(readfile(fileName))
+			end)
+			
+			if success and type(result) == "table" then
+				module.Config = result
+			end
+		end
+		
+		for key, elem in pairs(module.Elements) do
+			if module.Config[key] ~= nil then
+				elem.SetValue(module.Config[key])
+			end
+		end
+	end
+	
+	function module:CreateTextBox(placeholder, callback)
+		local TextBox = TextboxTemplate:Clone()
+		TextBox.Parent = main.Main.ContentContainer
+		TextBox.PlaceholderText = placeholder
+		
+		local function update(textVal, ignoreSave)
+			if callback then callback(textVal) end
+			if not ignoreSave then
+				module.Config[placeholder] = textVal
+				module:SaveConfig()
+			end
+		end
+
+		TextBox.TextButton.MouseButton1Click:Connect(function()
+			update(TextBox.Text, false)
+		end)
+		
+		module.Elements[placeholder] = {
+			SetValue = function(val)
+				TextBox.Text = val
+				update(val, true)
+			end
+		}
+		
+		if module.Config[placeholder] ~= nil then
+			TextBox.Text = module.Config[placeholder]
+			update(module.Config[placeholder], true)
+		end
+	end
+	
+	function module:CreateLabel(text)
+		local Label = LabelTemplate:Clone()
+		Label.Parent = main.Main.ContentContainer
+		Label.Text = text
+	end
+	
+	function module:CreateButton(text, callback)
+		local Button = ButtonTemplate:Clone()
+		Button.Parent = main.Main.ContentContainer
+		Button.Text = text
+		Button.MouseButton1Click:Connect(function()
+			if callback then callback() end
+		end)
+	end
+	
+	function module:CreateToggle(text, default, callback)
+		local toggled = default or false
+		local Toggle = ToggleTemplate:Clone()
+		Toggle.Parent = main.Main.ContentContainer
+		Toggle.Text = text
+		
+		local function update(ignoreSave)
+			Toggle.Checkbox.Text = toggled and "✓" or ""
+			if callback then callback(toggled) end
+			
+			if not ignoreSave then
+				module.Config[text] = toggled
+				module:SaveConfig()
+			end
+		end
+		
+		Toggle.Checkbox.MouseButton1Click:Connect(function()
+			toggled = not toggled
+			update(false)
+		end)
+		
+		module.Elements[text] = {
+			SetValue = function(val)
+				toggled = val
+				update(true)
+			end
+		}
+		
+		if module.Config[text] ~= nil then
+			toggled = module.Config[text]
+		end
+		update(true)
+	end
+	
+	function module:CreateNotification(text, desc, duration)
+		local Notification = NotificationTemplate:Clone()
+		Notification.TitleBar.TitleText.Text = text
+		Notification.Description.Text = desc
+		
+		Notification.TitleBar.CloseButton.MouseButton1Click:Connect(function()
+			Notification:Destroy()
+		end)
+		
+		Notification.Parent = main.Main.Notifications
+		Notification.Visible = true
+		
+		task.spawn(function()
+			for i = 1, duration do
+				task.wait(1)
+				if not Notification then return end
+				Notification.TitleBar.TitleText.Text = text.." ("..(duration - i)..")"
+			end
+			if Notification then Notification:Destroy() end
+		end)
+	end
+end
+
+return module
